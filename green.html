@@ -1,0 +1,3368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>绿途 - 可持续生活平台</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4CAF50',
+                        secondary: '#8BC34A',
+                        accent: '#CDDC39',
+                        neutral: '#E8F5E9',
+                        'primary-dark': '#388E3C',
+                        'primary-light': '#C8E6C9'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-all-300 {
+                transition: all 0.3s ease;
+            }
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1;
+            }
+            .task-card {
+                @apply bg-white rounded-xl shadow-card p-4 card-hover cursor-pointer;
+            }
+            .btn-primary {
+                @apply bg-primary text-white font-medium py-2 px-4 rounded-lg hover:bg-primary-dark transition-all duration-300;
+            }
+            .btn-secondary {
+                @apply bg-white text-primary border border-primary font-medium py-2 px-4 rounded-lg hover:bg-neutral transition-all duration-300;
+            }
+            .progress-bar {
+                @apply h-2 bg-neutral rounded-full overflow-hidden;
+            }
+            .progress-value {
+                @apply h-full bg-primary rounded-full transition-all duration-500 ease-out;
+            }
+            .badge {
+                @apply absolute -top-2 -right-2 bg-accent text-primary-dark text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center;
+            }
+            .achievement-icon {
+                @apply w-16 h-16 rounded-full bg-neutral flex items-center justify-center mb-1 transition-all duration-300 hover:scale-110 hover:shadow-md cursor-pointer;
+            }
+            .nav-active {
+                @apply text-primary;
+            }
+            .nav-inactive {
+                @apply text-gray-500;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 主容器 -->
+    <div id="app" class="max-w-md mx-auto bg-white min-h-screen relative pb-20">
+        <!-- 顶部导航栏 -->
+        <header class="bg-primary text-white p-4 sticky top-0 z-10 shadow-md">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold">绿途</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="relative">
+                        <i class="fa fa-search text-lg"></i>
+                    </button>
+                    <button class="relative">
+                        <i class="fa fa-bell text-lg"></i>
+                        <span class="absolute -top-1 -right-1 bg-accent text-primary-dark text-xs rounded-full w-4 h-4 flex items-center justify-center">2</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 内容区域 -->
+        <main class="p-4">
+            <!-- 用户信息卡片 -->
+            <section class="mb-6">
+                <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-4 text-white shadow-lg">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold">你好，环保先锋</h2>
+                            <p class="text-sm opacity-90">今日已减少碳排放 <span class="font-bold">1.2 kg</span></p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                            <i class="fa fa-user text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>本周目标进度</span>
+                            <span class="font-bold">68%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 68%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 碳资产账户 -->
+            <section class="mb-6">
+                <div class="task-card bg-white rounded-xl shadow-card p-4" onclick="navigateToCarbonAssets()">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-bold text-gray-800">碳资产账户</h3>
+                        <span class="text-primary text-sm flex items-center">
+                            查看详情 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="text-center">
+                            <p class="text-gray-500 text-sm">累计碳积分</p>
+                            <p class="text-2xl font-bold text-primary">2,580</p>
+                        </div>
+                        <div class="h-10 w-px bg-gray-200"></div>
+                        <div class="text-center">
+                            <p class="text-gray-500 text-sm">可兑换物品</p>
+                            <p class="text-2xl font-bold text-primary">12</p>
+                        </div>
+                        <div class="h-10 w-px bg-gray-200"></div>
+                        <div class="text-center">
+                            <p class="text-gray-500 text-sm">环保成就</p>
+                            <p class="text-2xl font-bold text-primary">8</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 今日任务 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-bold text-gray-800">今日任务</h3>
+                    <button class="text-primary text-sm flex items-center">
+                        查看全部 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- 知识学习任务 -->
+                    <div class="task-card" onclick="navigateToTask('knowledge')">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center mb-3 border border-green-100">
+                                <i class="fa fa-graduation-cap text-2xl text-green-600"></i>
+                            </div>
+                            <span class="badge">新</span>
+                        </div>
+                        <h4 class="font-bold text-gray-800 mb-1">环保知识问答</h4>
+                        <p class="text-xs text-gray-500 mb-2">学习垃圾分类知识</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-primary font-bold">+30 积分</span>
+                            <span class="text-xs text-gray-400">5分钟</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 主动上报任务 -->
+                    <div class="task-card" onclick="navigateToTask('report')">
+                        <div class="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center mb-3 border border-green-100">
+                            <i class="fa fa-recycle text-2xl text-green-600"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-800 mb-1">垃圾分类上报</h4>
+                        <p class="text-xs text-gray-500 mb-2">上传分类照片</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-primary font-bold">+50 积分</span>
+                            <span class="text-xs text-gray-400">3分钟</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 自动验证任务 -->
+                    <div class="task-card" onclick="navigateToTask('auto')">
+                        <div class="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center mb-3 border border-green-100">
+                            <i class="fa fa-bicycle text-2xl text-green-600"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-800 mb-1">绿色出行记录</h4>
+                        <p class="text-xs text-gray-500 mb-2">步行/骑行数据</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-primary font-bold">+20 积分</span>
+                            <span class="text-xs text-gray-400">自动</span>
+                        </div>
+                    </div>
+                    
+                    <!-- AI推荐任务 -->
+                    <div class="task-card" onclick="navigateToTask('ai')">
+                        <div class="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center mb-3 border border-green-100">
+                            <i class="fa fa-lightbulb-o text-2xl text-green-600"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-800 mb-1">个性化减碳方案</h4>
+                        <p class="text-xs text-gray-500 mb-2">AI为你定制</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-primary font-bold">+100 积分</span>
+                            <span class="text-xs text-gray-400">7天</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 环保成就 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-bold text-gray-800">环保成就</h3>
+                    <button class="text-primary text-sm flex items-center">
+                        全部 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                <div class="flex space-x-4 overflow-x-auto pb-2">
+                    <!-- 新手上路 -->
+                    <div class="flex-shrink-0 flex flex-col items-center" onclick="showAchievementDetail('newbie')">
+                        <div class="achievement-icon bg-gradient-to-br from-green-50 to-green-100">
+                            <i class="fa fa-leaf text-3xl text-green-600"></i>
+                        </div>
+                        <span class="text-xs text-gray-600">新手上路</span>
+                    </div>
+                    
+                    <!-- 环保达人 -->
+                    <div class="flex-shrink-0 flex flex-col items-center" onclick="showAchievementDetail('expert')">
+                        <div class="achievement-icon bg-gradient-to-br from-green-50 to-green-100">
+                            <i class="fa fa-tree text-3xl text-green-600"></i>
+                        </div>
+                        <span class="text-xs text-gray-600">环保达人</span>
+                    </div>
+                    
+                    <!-- 生态守护者 -->
+                    <div class="flex-shrink-0 flex flex-col items-center" onclick="showAchievementDetail('guardian')">
+                        <div class="achievement-icon bg-gradient-to-br from-green-50 to-green-100">
+                            <i class="fa fa-shield text-3xl text-green-600"></i>
+                        </div>
+                        <span class="text-xs text-gray-600">生态守护者</span>
+                    </div>
+                    
+                    <!-- 影响力先锋 -->
+                    <div class="flex-shrink-0 flex flex-col items-center" onclick="showAchievementDetail('influencer')">
+                        <div class="achievement-icon bg-gradient-to-br from-green-50 to-green-100">
+                            <i class="fa fa-users text-3xl text-green-600"></i>
+                        </div>
+                        <span class="text-xs text-gray-600">影响力先锋</span>
+                    </div>
+                    
+                    <!-- 碳中和英雄 -->
+                    <div class="flex-shrink-0 flex flex-col items-center" onclick="showAchievementDetail('hero')">
+                        <div class="achievement-icon bg-gradient-to-br from-green-50 to-green-100">
+                            <i class="fa fa-trophy text-3xl text-green-600"></i>
+                        </div>
+                        <span class="text-xs text-gray-600">碳中和英雄</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 碳排放统计 -->
+            <section class="mb-6">
+                <div class="task-card">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-bold text-gray-800">碳排放统计</h3>
+                        <div class="flex space-x-2">
+                            <button class="text-xs px-2 py-1 rounded-full bg-primary text-white">周</button>
+                            <button class="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-600">月</button>
+                            <button class="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-600">年</button>
+                        </div>
+                    </div>
+                    <div class="h-40">
+                        <canvas id="carbonChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 底部导航栏 -->
+        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 flex justify-around items-center h-16 z-10">
+            <button onclick="navigateTo('home')" class="flex flex-col items-center justify-center nav-active">
+                <i class="fa fa-home text-xl"></i>
+                <span class="text-xs mt-1">首页</span>
+            </button>
+            <button onclick="navigateTo('explore')" class="flex flex-col items-center justify-center nav-inactive">
+                <i class="fa fa-compass text-xl"></i>
+                <span class="text-xs mt-1">探索</span>
+            </button>
+            <button onclick="navigateTo('report')" class="flex flex-col items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center -mt-5 shadow-lg">
+                    <i class="fa fa-plus text-white text-xl"></i>
+                </div>
+                <span class="text-xs mt-1 text-gray-500">上报</span>
+            </button>
+            <button onclick="navigateTo('exchange')" class="flex flex-col items-center justify-center nav-inactive">
+                <i class="fa fa-shopping-bag text-xl"></i>
+                <span class="text-xs mt-1">兑换</span>
+            </button>
+            <button onclick="navigateTo('profile')" class="flex flex-col items-center justify-center nav-inactive">
+                <i class="fa fa-user text-xl"></i>
+                <span class="text-xs mt-1">我的</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ==================== 探索页面 ==================== -->
+    <div id="explore-page" class="max-w-md mx-auto bg-white min-h-screen relative pb-20 hidden">
+        <!-- 顶部导航栏 -->
+        <header class="bg-primary text-white p-4 sticky top-0 z-10 shadow-md">
+            <div class="flex items-center">
+                <button onclick="navigateTo('home')" class="mr-4">
+                    <i class="fa fa-arrow-left text-lg"></i>
+                </button>
+                <h1 class="text-xl font-bold">探索</h1>
+            </div>
+        </header>
+
+        <!-- 内容区域 -->
+        <main class="p-4">
+            <!-- 搜索栏 -->
+            <section class="mb-6">
+                <div class="relative">
+                    <input type="text" placeholder="搜索环保资讯、活动、商品..." 
+                           class="w-full p-3 pl-10 bg-gray-100 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <i class="fa fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                </div>
+            </section>
+
+            <!-- 环保资讯 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">最新环保资讯</h2>
+                    <button class="text-primary text-sm flex items-center">
+                        更多 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- 资讯卡片1 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover">
+                        <div class="flex items-center mb-3">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                <i class="fa fa-newspaper-o text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">碳中和政策解读</h3>
+                                <p class="text-xs text-gray-500">政府最新发布</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">了解最新的碳中和政策，掌握环保发展趋势...</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-400"><i class="fa fa-clock-o mr-1"></i> 2小时前</span>
+                            <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">政策解读</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 资讯卡片2 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover">
+                        <div class="flex items-center mb-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                <i class="fa fa-lightbulb-o text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">家庭节能小妙招</h3>
+                                <p class="text-xs text-gray-500">实用技巧分享</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">10个简单易行的家庭节能方法，每月省电30%...</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-400"><i class="fa fa-clock-o mr-1"></i> 1天前</span>
+                            <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">生活技巧</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 环保活动 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">近期环保活动</h2>
+                    <button class="text-primary text-sm flex items-center">
+                        全部 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto pb-4 -mx-2 px-2">
+                    <div class="flex space-x-4">
+                        <!-- 活动卡片1 -->
+                        <div class="flex-shrink-0 w-64 bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 card-hover">
+                            <div class="flex items-center mb-3">
+                                <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mr-3">
+                                    <i class="fa fa-tree text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">社区植树活动</h3>
+                                    <p class="text-xs text-gray-500">本周六 · 城市公园</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4">参与社区植树，为城市添绿，完成可得200积分</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-green-600 font-bold"><i class="fa fa-users mr-1"></i> 32人已报名</span>
+                                <button class="text-xs bg-primary text-white px-3 py-1 rounded-full">立即报名</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 活动卡片2 -->
+                        <div class="flex-shrink-0 w-64 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 card-hover">
+                            <div class="flex items-center mb-3">
+                                <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mr-3">
+                                    <i class="fa fa-recycle text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">垃圾分类讲座</h3>
+                                    <p class="text-xs text-gray-500">本周日 · 社区中心</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4">学习垃圾分类知识，现场实践，完成可得150积分</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-blue-600 font-bold"><i class="fa fa-users mr-1"></i> 18人已报名</span>
+                                <button class="text-xs bg-primary text-white px-3 py-1 rounded-full">立即报名</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 环保商品 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">绿色生活好物</h2>
+                    <button onclick="navigateTo('exchange')" class="text-primary text-sm flex items-center">
+                        去兑换 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- 商品1 -->
+                    <div class="bg-white rounded-xl shadow-card p-3 card-hover">
+                        <div class="w-full h-32 bg-green-50 rounded-lg mb-2 flex items-center justify-center">
+                            <i class="fa fa-shopping-bag text-4xl text-green-600"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm mb-1">环保购物袋</h3>
+                        <p class="text-xs text-gray-500 mb-2">可重复使用</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-primary font-bold text-sm">30 积分</span>
+                            <span class="text-xs text-gray-400">库存：28</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 商品2 -->
+                    <div class="bg-white rounded-xl shadow-card p-3 card-hover">
+                        <div class="w-full h-32 bg-blue-50 rounded-lg mb-2 flex items-center justify-center">
+                            <i class="fa fa-tint text-4xl text-blue-600"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-sm mb-1">不锈钢水杯</h3>
+                        <p class="text-xs text-gray-500 mb-2">减少塑料使用</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-primary font-bold text-sm">120 积分</span>
+                            <span class="text-xs text-gray-400">库存：15</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 环保社区 -->
+            <section class="mb-6">
+                <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-4 text-white">
+                    <div class="flex items-center mb-3">
+                        <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mr-3">
+                            <i class="fa fa-users text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">加入环保社区</h3>
+                            <p class="text-sm opacity-90">与志同道合的伙伴一起行动</p>
+                        </div>
+                    </div>
+                    <p class="text-sm mb-4 opacity-90">分享经验、参与讨论、组队参加活动，让环保之路不再孤单</p>
+                    <button onclick="navigateTo('community')" class="btn-secondary w-full text-primary-dark bg-white hover:bg-white/90">
+                        <i class="fa fa-plus mr-2"></i> 加入社区
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ==================== 我的页面 ==================== -->
+    <div id="profile-page" class="max-w-md mx-auto bg-white min-h-screen relative pb-20 hidden">
+        <!-- 顶部导航栏 -->
+        <header class="bg-primary text-white p-4 sticky top-0 z-10 shadow-md">
+            <div class="flex items-center">
+                <button onclick="navigateTo('home')" class="mr-4">
+                    <i class="fa fa-arrow-left text-lg"></i>
+                </button>
+                <h1 class="text-xl font-bold">我的</h1>
+            </div>
+        </header>
+
+        <!-- 内容区域 -->
+        <main class="p-4">
+            <!-- 用户信息 -->
+            <section class="mb-6">
+                <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-4 text-white shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-16 h-16 rounded-full bg-white/30 flex items-center justify-center mr-4">
+                            <i class="fa fa-user text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">环保先锋</h2>
+                            <p class="text-sm opacity-90">绿途等级：Lv.8</p>
+                            <div class="flex items-center mt-1">
+                                <i class="fa fa-star text-accent mr-1 text-sm"></i>
+                                <i class="fa fa-star text-accent mr-1 text-sm"></i>
+                                <i class="fa fa-star text-accent mr-1 text-sm"></i>
+                                <i class="fa fa-star text-accent mr-1 text-sm"></i>
+                                <i class="fa fa-star text-gray-300 text-sm"></i>
+                                <span class="text-xs ml-2 opacity-90">(4.0)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-sm opacity-90">加入天数</p>
+                            <p class="text-xl font-bold">128</p>
+                        </div>
+                        <div>
+                            <p class="text-sm opacity-90">累计积分</p>
+                            <p class="text-xl font-bold">2,580</p>
+                        </div>
+                        <div>
+                            <p class="text-sm opacity-90">影响力</p>
+                            <p class="text-xl font-bold">86</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 我的功能 -->
+            <section class="mb-6">
+                <div class="bg-white rounded-xl shadow-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">我的功能</h3>
+                    <div class="grid grid-cols-4 gap-3">
+                        <button onclick="navigateToCarbonAssets()" class="flex flex-col items-center justify-center p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-2">
+                                <i class="fa fa-pie-chart text-green-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-700">碳资产</span>
+                        </button>
+                        
+                        <button onclick="showAchievementDetail('all')" class="flex flex-col items-center justify-center p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+                                <i class="fa fa-trophy text-blue-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-700">成就</span>
+                        </button>
+                        
+                        <button onclick="navigateTo('history')" class="flex flex-col items-center justify-center p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
+                                <i class="fa fa-history text-yellow-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-700">历史</span>
+                        </button>
+                        
+                        <button onclick="navigateTo('ranking')" class="flex flex-col items-center justify-center p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mb-2">
+                                <i class="fa fa-bar-chart text-purple-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-700">排名</span>
+                        </button>
+                        
+                        <button onclick="navigateTo('settings')" class="flex flex-col items-center justify-center p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mb-2">
+                                <i class="fa fa-cog text-red-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-700">设置</span>
+                        </button>
+                        
+                        <button onclick="navigateTo('help')" class="flex flex-col items-center justify-center p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mb-2">
+                                <i class="fa fa-question-circle text-indigo-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-700">帮助</span>
+                        </button>
+                        
+                        <button onclick="navigateTo('invite')" class="flex flex-col items-center justify-center p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mb-2">
+                                <i class="fa fa-share-alt text-pink-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-700">邀请</span>
+                        </button>
+                        
+                        <button onclick="navigateTo('feedback')" class="flex flex-col items-center justify-center p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center mb-2">
+                                <i class="fa fa-commenting text-teal-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-700">反馈</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 环保数据统计 -->
+            <section class="mb-6">
+                <div class="bg-white rounded-xl shadow-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">我的环保数据</h3>
+                    
+                    <div class="space-y-4">
+                        <!-- 碳排放减少 -->
+                        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                    <i class="fa fa-leaf text-green-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">累计减少碳排放</p>
+                                    <p class="text-xs text-gray-500">相当于种植了25棵树</p>
+                                </div>
+                            </div>
+                            <span class="font-bold text-green-600">258 kg</span>
+                        </div>
+                        
+                        <!-- 完成任务 -->
+                        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                    <i class="fa fa-check-circle text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">完成任务数</p>
+                                    <p class="text-xs text-gray-500">连续打卡32天</p>
+                                </div>
+                            </div>
+                            <span class="font-bold text-blue-600">86 个</span>
+                        </div>
+                        
+                        <!-- 绿色出行 -->
+                        <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
+                                    <i class="fa fa-bicycle text-yellow-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">绿色出行里程</p>
+                                    <p class="text-xs text-gray-500">减少开车256公里</p>
+                                </div>
+                            </div>
+                            <span class="font-bold text-yellow-600">128 km</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 月度报告 -->
+            <section class="mb-6">
+                <div class="bg-white rounded-xl shadow-card p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">月度环保报告</h3>
+                        <button class="text-primary text-sm flex items-center">
+                            查看详情 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-primary-light to-neutral rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mr-3">
+                                <i class="fa fa-calendar text-primary text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">10月环保报告</h4>
+                                <p class="text-xs text-gray-500">超越85%的用户</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-700">减碳总量</span>
+                                <span class="font-bold text-primary">32.5 kg</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-700">获得积分</span>
+                                <span class="font-bold text-primary">+420</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-700">完成率</span>
+                                <span class="font-bold text-primary">92%</span>
+                            </div>
+                        </div>
+                        
+                        <button class="mt-4 btn-secondary w-full">下载详细报告</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 设置与帮助 -->
+            <section class="mb-6">
+                <div class="bg-white rounded-xl shadow-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">设置与帮助</h3>
+                    
+                    <div class="space-y-2">
+                        <button onclick="navigateTo('settings')" class="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="flex items-center">
+                                <i class="fa fa-cog text-gray-500 mr-3"></i>
+                                <span class="text-gray-700">账号设置</span>
+                            </div>
+                            <i class="fa fa-chevron-right text-gray-400"></i>
+                        </button>
+                        
+                        <button onclick="navigateTo('privacy')" class="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="flex items-center">
+                                <i class="fa fa-shield text-gray-500 mr-3"></i>
+                                <span class="text-gray-700">隐私与安全</span>
+                            </div>
+                            <i class="fa fa-chevron-right text-gray-400"></i>
+                        </button>
+                        
+                        <button onclick="navigateTo('help')" class="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="flex items-center">
+                                <i class="fa fa-question-circle text-gray-500 mr-3"></i>
+                                <span class="text-gray-700">帮助中心</span>
+                            </div>
+                            <i class="fa fa-chevron-right text-gray-400"></i>
+                        </button>
+                        
+                        <button onclick="navigateTo('feedback')" class="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-all duration-300">
+                            <div class="flex items-center">
+                                <i class="fa fa-commenting text-gray-500 mr-3"></i>
+                                <span class="text-gray-700">意见反馈</span>
+                            </div>
+                            <i class="fa fa-chevron-right text-gray-400"></i>
+                        </button>
+                        
+                        <button onclick="logout()" class="w-full flex items-center justify-between p-3 hover:bg-red-50 rounded-lg transition-all duration-300">
+                            <div class="flex items-center">
+                                <i class="fa fa-sign-out text-red-500 mr-3"></i>
+                                <span class="text-red-600">退出登录</span>
+                            </div>
+                            <i class="fa fa-chevron-right text-red-400"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ==================== 上报页面 ==================== -->
+    <div id="report-page" class="max-w-md mx-auto bg-white min-h-screen relative pb-20 hidden">
+        <!-- 顶部导航栏 -->
+        <header class="bg-primary text-white p-4 sticky top-0 z-10 shadow-md">
+            <div class="flex items-center">
+                <button onclick="navigateTo('home')" class="mr-4">
+                    <i class="fa fa-arrow-left text-lg"></i>
+                </button>
+                <h1 class="text-xl font-bold">上报</h1>
+            </div>
+        </header>
+
+        <!-- 内容区域 -->
+        <main class="p-4">
+            <!-- 上报类型选择 -->
+            <section class="mb-6">
+                <h2 class="text-lg font-bold text-gray-800 mb-4">选择上报类型</h2>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="selectReportType('garbage')" class="bg-white rounded-xl shadow-card p-4 card-hover flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-3">
+                            <i class="fa fa-trash text-green-600 text-xl"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 mb-1">垃圾分类</span>
+                        <span class="text-xs text-gray-500">上传分类照片</span>
+                    </button>
+                    
+                    <button onclick="selectReportType('energy')" class="bg-white rounded-xl shadow-card p-4 card-hover flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                            <i class="fa fa-bolt text-blue-600 text-xl"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 mb-1">节能行为</span>
+                        <span class="text-xs text-gray-500">记录节能措施</span>
+                    </button>
+                    
+                    <button onclick="selectReportType('travel')" class="bg-white rounded-xl shadow-card p-4 card-hover flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
+                            <i class="fa fa-bicycle text-yellow-600 text-xl"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 mb-1">绿色出行</span>
+                        <span class="text-xs text-gray-500">记录出行方式</span>
+                    </button>
+                    
+                    <button onclick="selectReportType('other')" class="bg-white rounded-xl shadow-card p-4 card-hover flex flex-col items-center">
+                        <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-3">
+                            <i class="fa fa-plus text-purple-600 text-xl"></i>
+                        </div>
+                        <span class="font-bold text-gray-800 mb-1">其他环保行为</span>
+                        <span class="text-xs text-gray-500">自定义上报</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 照片上传区域 -->
+            <section id="report-content" class="mb-6 hidden">
+                <div class="bg-white rounded-xl shadow-card p-4">
+                    <h3 id="report-title" class="text-lg font-bold text-gray-800 mb-3">垃圾分类上报</h3>
+                    
+                    <!-- 图片上传区域 -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 mb-4 text-center hover:border-primary transition-all duration-300">
+                        <i class="fa fa-camera text-4xl text-gray-400 mb-3"></i>
+                        <p class="text-gray-500 mb-2">点击上传照片</p>
+                        <p class="text-xs text-gray-400 mb-4">支持 JPG、PNG 格式，最大5MB</p>
+                        <input type="file" id="photo-upload" class="hidden" accept="image/*">
+                        <button onclick="document.getElementById('photo-upload').click()" class="btn-secondary">选择照片</button>
+                    </div>
+                    
+                    <!-- 照片预览区域 -->
+                    <div id="photo-preview" class="hidden mb-4">
+                        <div class="relative">
+                            <img id="preview-image" src="" alt="预览" class="w-full h-48 object-cover rounded-lg">
+                            <button onclick="removePhoto()" class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-xs text-gray-500">上传成功</span>
+                            <button onclick="retakePhoto()" class="text-xs text-primary">重新拍摄</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 描述输入框 -->
+                    <div class="mb-4">
+                        <label class="text-gray-700 mb-2 block">补充描述 (可选)</label>
+                        <textarea id="report-description" class="w-full border border-gray-300 rounded-lg p-3 text-gray-600" rows="3" placeholder="请描述您的环保行为..."></textarea>
+                    </div>
+                    
+                    <!-- 上报奖励 -->
+                    <div class="bg-green-50 rounded-lg p-4 mb-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-medium text-gray-800">上报奖励</p>
+                                <p class="text-sm text-gray-600">审核通过后获得</p>
+                            </div>
+                            <span id="report-reward" class="text-xl font-bold text-primary">+50 积分</span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="submitReport()" class="btn-primary w-full">提交上报</button>
+                </div>
+            </section>
+
+            <!-- 上报记录 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">最近上报记录</h2>
+                    <button onclick="viewAllReports()" class="text-primary text-sm flex items-center">
+                        全部 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-3">
+                    <!-- 记录1 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                <i class="fa fa-trash text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">垃圾分类</p>
+                                <p class="text-xs text-gray-500">今天 09:30 · 厨房垃圾</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-green-600 font-bold">+50</span>
+                            <div class="text-xs text-green-500">已审核</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 记录2 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                <i class="fa fa-bolt text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">节能行为</p>
+                                <p class="text-xs text-gray-500">昨天 18:20 · 关闭待机电器</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-green-600 font-bold">+20</span>
+                            <div class="text-xs text-green-500">已审核</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 记录3 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
+                                <i class="fa fa-bicycle text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">绿色出行</p>
+                                <p class="text-xs text-gray-500">前天 08:15 · 骑行上班</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-yellow-600 font-bold">审核中</span>
+                            <div class="text-xs text-gray-500">预计+30积分</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ==================== 兑换页面 ==================== -->
+    <div id="exchange-page" class="max-w-md mx-auto bg-white min-h-screen relative pb-20 hidden">
+        <!-- 顶部导航栏 -->
+        <header class="bg-primary text-white p-4 sticky top-0 z-10 shadow-md">
+            <div class="flex items-center">
+                <button onclick="navigateTo('home')" class="mr-4">
+                    <i class="fa fa-arrow-left text-lg"></i>
+                </button>
+                <h1 class="text-xl font-bold">积分兑换</h1>
+            </div>
+        </header>
+
+        <!-- 内容区域 -->
+        <main class="p-4">
+            <!-- 积分余额 -->
+            <section class="mb-6">
+                <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-4 text-white shadow-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <p class="text-sm opacity-90">可用积分</p>
+                            <p class="text-3xl font-bold">2,580</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm opacity-90">可兑换商品</p>
+                            <p class="text-3xl font-bold">12</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>本周积分获取</span>
+                            <span class="font-bold">+320</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value" style="width: 64%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 兑换分类 -->
+            <section class="mb-6">
+                <div class="flex overflow-x-auto space-x-3 pb-2">
+                    <button class="flex-shrink-0 bg-primary text-white px-4 py-2 rounded-full font-medium">全部</button>
+                    <button class="flex-shrink-0 bg-gray-100 text-gray-700 px-4 py-2 rounded-full font-medium hover:bg-gray-200">生活用品</button>
+                    <button class="flex-shrink-0 bg-gray-100 text-gray-700 px-4 py-2 rounded-full font-medium hover:bg-gray-200">绿色出行</button>
+                    <button class="flex-shrink-0 bg-gray-100 text-gray-700 px-4 py-2 rounded-full font-medium hover:bg-gray-200">环保商品</button>
+                    <button class="flex-shrink-0 bg-gray-100 text-gray-700 px-4 py-2 rounded-full font-medium hover:bg-gray-200">数字权益</button>
+                    <button onclick="navigateTo('donate')" class="flex-shrink-0 bg-gray-100 text-gray-700 px-4 py-2 rounded-full font-medium hover:bg-gray-200">公益捐赠</button>
+                </div>
+            </section>
+
+            <!-- 热门兑换商品 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">热门兑换</h2>
+                    <button class="text-primary text-sm flex items-center">
+                        更多 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- 商品1 -->
+                    <div class="bg-white rounded-xl shadow-card p-3 card-hover">
+                        <div class="w-full h-32 bg-green-50 rounded-lg mb-2 flex items-center justify-center">
+                            <i class="fa fa-shopping-bag text-4xl text-green-600"></i>
+                        </div>
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-bold text-gray-800 text-sm">环保购物袋</h3>
+                            <span class="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded">热销</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-2">可重复使用，减少塑料袋使用</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-primary font-bold text-sm">30 积分</span>
+                            <span class="text-xs text-gray-400">库存：28</span>
+                        </div>
+                        <button onclick="exchangeItem(1)" class="btn-primary w-full mt-2 text-sm py-1.5">立即兑换</button>
+                    </div>
+                    
+                    <!-- 商品2 -->
+                    <div class="bg-white rounded-xl shadow-card p-3 card-hover">
+                        <div class="w-full h-32 bg-blue-50 rounded-lg mb-2 flex items-center justify-center">
+                            <i class="fa fa-tint text-4xl text-blue-600"></i>
+                        </div>
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-bold text-gray-800 text-sm">不锈钢水杯</h3>
+                            <span class="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded">新品</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-2">保温保冷，减少一次性杯子</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-primary font-bold text-sm">120 积分</span>
+                            <span class="text-xs text-gray-400">库存：15</span>
+                        </div>
+                        <button onclick="exchangeItem(2)" class="btn-primary w-full mt-2 text-sm py-1.5">立即兑换</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 全部商品 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">全部商品</h2>
+                    <div class="flex items-center space-x-2">
+                        <button class="text-gray-500 text-sm flex items-center">
+                            <i class="fa fa-filter mr-1"></i> 筛选
+                        </button>
+                        <button class="text-gray-500 text-sm flex items-center">
+                            <i class="fa fa-sort mr-1"></i> 排序
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <!-- 商品1 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover">
+                        <div class="flex items-center">
+                            <div class="w-16 h-16 rounded-lg bg-green-50 flex items-center justify-center mr-4">
+                                <i class="fa fa-leaf text-2xl text-green-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-800">绿植盆栽</h3>
+                                    <span class="text-primary font-bold">80 积分</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">净化空气，美化环境，小盆多肉植物</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-500">库存：22</span>
+                                    <button onclick="exchangeItem(3)" class="btn-primary text-sm py-1 px-3">兑换</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 商品2 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover">
+                        <div class="flex items-center">
+                            <div class="w-16 h-16 rounded-lg bg-yellow-50 flex items-center justify-center mr-4">
+                                <i class="fa fa-bicycle text-2xl text-yellow-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-800">共享单车月卡</h3>
+                                    <span class="text-primary font-bold">150 积分</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">30天无限次骑行，绿色出行首选</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-500">库存：35</span>
+                                    <button onclick="exchangeItem(4)" class="btn-primary text-sm py-1 px-3">兑换</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 商品3 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover">
+                        <div class="flex items-center">
+                            <div class="w-16 h-16 rounded-lg bg-red-50 flex items-center justify-center mr-4">
+                                <i class="fa fa-coffee text-2xl text-red-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-800">咖啡杯折扣券</h3>
+                                    <span class="text-primary font-bold">20 积分</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">自带杯购买咖啡享5折优惠</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-500">库存：50</span>
+                                    <button onclick="exchangeItem(5)" class="btn-primary text-sm py-1 px-3">兑换</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 商品4 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover">
+                        <div class="flex items-center">
+                            <div class="w-16 h-16 rounded-lg bg-purple-50 flex items-center justify-center mr-4">
+                                <i class="fa fa-book text-2xl text-purple-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-800">环保书籍</h3>
+                                    <span class="text-primary font-bold">60 积分</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">《零浪费生活》纸质书籍</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-500">库存：12</span>
+                                    <button onclick="exchangeItem(6)" class="btn-primary text-sm py-1 px-3">兑换</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 公益捐赠 -->
+            <section class="mb-6">
+                <div class="bg-gradient-to-r from-green-100 to-blue-100 rounded-xl p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mr-3">
+                            <i class="fa fa-heart text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">公益捐赠</h3>
+                            <p class="text-sm text-gray-600">将积分捐赠给环保项目</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">您的积分可以转化为植树造林、清洁海洋等公益项目的实际支持</p>
+                    <button onclick="navigateTo('donate')" class="btn-secondary w-full">了解捐赠项目</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ==================== 任务详情页 (默认隐藏) ==================== -->
+    <div id="task-detail" class="max-w-md mx-auto bg-white min-h-screen relative pb-20 hidden">
+        <!-- 顶部导航栏 -->
+        <header class="bg-primary text-white p-4 sticky top-0 z-10 shadow-md">
+            <div class="flex items-center">
+                <button onclick="backToHome()" class="mr-4">
+                    <i class="fa fa-arrow-left text-lg"></i>
+                </button>
+                <h1 id="task-title" class="text-xl font-bold">任务详情</h1>
+            </div>
+        </header>
+
+        <!-- 任务内容区域 -->
+        <main class="p-4">
+            <!-- 任务信息卡片 -->
+            <section class="mb-6">
+                <div id="task-info" class="bg-white rounded-xl shadow-card p-6 text-center">
+                    <!-- 任务图标 -->
+                    <div id="task-icon-container" class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center mx-auto mb-4">
+                        <i id="task-icon-fa" class="text-3xl text-primary"></i>
+                    </div>
+                    
+                    <!-- 任务标题和描述 -->
+                    <h2 id="task-detail-title" class="text-xl font-bold text-gray-800 mb-2">任务标题</h2>
+                    <p id="task-description" class="text-gray-600 mb-4">任务描述将显示在这里...</p>
+                    
+                    <!-- 任务奖励 -->
+                    <div class="bg-neutral rounded-lg p-3 mb-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700">完成奖励</span>
+                            <span id="task-reward" class="text-primary font-bold">+0 积分</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-gray-700">预计耗时</span>
+                            <span id="task-time" class="text-gray-700">0分钟</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 任务互动区域 -->
+            <section id="task-interaction" class="mb-6">
+                <!-- 知识学习任务互动 -->
+                <div id="knowledge-interaction" class="hidden">
+                    <div class="bg-white rounded-xl shadow-card p-4 mb-4">
+                        <h3 class="font-bold text-gray-800 mb-3">垃圾分类知识问答</h3>
+                        
+                        <!-- 问题1 -->
+                        <div class="mb-6">
+                            <p class="text-gray-700 mb-3">1. 下列哪项属于可回收垃圾？</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="radio" id="q1-a" name="q1" class="mr-2">
+                                    <label for="q1-a" class="text-gray-600">果皮</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="q1-b" name="q1" class="mr-2">
+                                    <label for="q1-b" class="text-gray-600">塑料瓶</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="q1-c" name="q1" class="mr-2">
+                                    <label for="q1-c" class="text-gray-600">电池</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="q1-d" name="q1" class="mr-2">
+                                    <label for="q1-d" class="text-gray-600">纸巾</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 问题2 -->
+                        <div class="mb-6">
+                            <p class="text-gray-700 mb-3">2. 废旧电池应该投入哪种垃圾桶？</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="radio" id="q2-a" name="q2" class="mr-2">
+                                    <label for="q2-a" class="text-gray-600">蓝色可回收桶</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="q2-b" name="q2" class="mr-2">
+                                    <label for="q2-b" class="text-gray-600">绿色厨余桶</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="q2-c" name="q2" class="mr-2">
+                                    <label for="q2-c" class="text-gray-600">红色有害桶</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="q2-d" name="q2" class="mr-2">
+                                    <label for="q2-d" class="text-gray-600">灰色其他桶</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button id="submit-knowledge" class="btn-primary w-full">提交答案</button>
+                    </div>
+                </div>
+                
+                <!-- 主动上报任务互动 -->
+                <div id="report-interaction" class="hidden">
+                    <div class="bg-white rounded-xl shadow-card p-4 mb-4">
+                        <h3 class="font-bold text-gray-800 mb-3">垃圾分类上报</h3>
+                        <p class="text-gray-600 mb-4">请上传您进行垃圾分类的照片，我们将验证并给予奖励。</p>
+                        
+                        <!-- 图片上传区域 -->
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-4 text-center">
+                            <i class="fa fa-camera text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-500 mb-2">点击上传照片</p>
+                            <input type="file" id="report-upload" class="hidden" accept="image/*">
+                            <button onclick="document.getElementById('report-upload').click()" class="btn-secondary">选择照片</button>
+                        </div>
+                        
+                        <!-- 照片预览区域 -->
+                        <div id="report-preview" class="hidden mb-4">
+                            <img id="preview-img" src="" alt="预览" class="w-full h-48 object-cover rounded-lg">
+                            <div class="flex justify-end mt-2">
+                                <button onclick="removePreview()" class="text-red-500 text-sm flex items-center">
+                                    <i class="fa fa-trash mr-1"></i> 删除
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 描述输入框 -->
+                        <div class="mb-4">
+                            <label for="report-description" class="text-gray-700 mb-2 block">补充描述 (可选)</label>
+                            <textarea id="report-description" class="w-full border border-gray-300 rounded-lg p-3 text-gray-600" rows="3" placeholder="例如：我在社区进行了垃圾分类..."></textarea>
+                        </div>
+                        
+                        <button id="submit-report" class="btn-primary w-full">提交上报</button>
+                    </div>
+                </div>
+                
+                <!-- 自动验证任务互动 -->
+                <div id="auto-interaction" class="hidden">
+                    <div class="bg-white rounded-xl shadow-card p-4 mb-4">
+                        <h3 class="font-bold text-gray-800 mb-3">绿色出行记录</h3>
+                        <p class="text-gray-600 mb-4">我们将自动检测您的步行/骑行数据，无需手动记录。</p>
+                        
+                        <!-- 出行数据展示 -->
+                        <div class="bg-neutral rounded-lg p-4 mb-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-gray-700">今日步行</span>
+                                <span class="text-primary font-bold">5,280 步</span>
+                            </div>
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-gray-700">今日骑行</span>
+                                <span class="text-primary font-bold">3.5 公里</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-700">减少碳排放</span>
+                                <span class="text-primary font-bold">0.8 kg</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 出行图表 -->
+                        <div class="mb-4">
+                            <h4 class="text-gray-700 mb-2">本周出行统计</h4>
+                            <div class="h-40">
+                                <canvas id="travelChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <button id="sync-data" class="btn-primary w-full">同步最新数据</button>
+                    </div>
+                </div>
+                
+                <!-- AI推荐任务互动 -->
+                <div id="ai-interaction" class="hidden">
+                    <div class="bg-white rounded-xl shadow-card p-4 mb-4">
+                        <h3 class="font-bold text-gray-800 mb-3">个性化减碳方案</h3>
+                        <p class="text-gray-600 mb-4">基于您的生活习惯，AI为您定制了专属减碳方案。</p>
+                        
+                        <!-- AI分析结果 -->
+                        <div class="bg-neutral rounded-lg p-4 mb-4">
+                            <div class="flex items-center mb-3">
+                                <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center mr-3">
+                                    <i class="fa fa-lightbulb-o text-white"></i>
+                                </div>
+                                <h4 class="font-bold text-gray-800">AI分析结果</h4>
+                            </div>
+                            <p class="text-gray-600 mb-3">根据您的生活习惯分析，您在以下方面有较大减碳空间：</p>
+                            <ul class="list-disc list-inside text-gray-600 space-y-1 mb-3">
+                                <li>日常出行 - 建议增加公共交通使用</li>
+                                <li>家庭用电 - 建议使用节能电器</li>
+                                <li>饮食习惯 - 建议减少肉类消费</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- 个性化方案 -->
+                        <div class="mb-4">
+                            <h4 class="text-gray-700 mb-3">为您定制的7天减碳计划</h4>
+                            
+                            <!-- 方案列表 -->
+                            <div class="space-y-3">
+                                <div class="border border-gray-200 rounded-lg p-3">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-bold text-gray-800">周一</span>
+                                        <span class="text-xs bg-primary-light text-primary px-2 py-1 rounded-full">出行</span>
+                                    </div>
+                                    <p class="text-gray-600 text-sm">骑自行车上班，减少开车10公里，可减少碳排放约2kg</p>
+                                </div>
+                                
+                                <div class="border border-gray-200 rounded-lg p-3">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-bold text-gray-800">周三</span>
+                                        <span class="text-xs bg-primary-light text-primary px-2 py-1 rounded-full">饮食</span>
+                                    </div>
+                                    <p class="text-gray-600 text-sm">尝试一天素食，减少肉类消费，可减少碳排放约1.5kg</p>
+                                </div>
+                                
+                                <div class="border border-gray-200 rounded-lg p-3">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="font-bold text-gray-800">周五</span>
+                                        <span class="text-xs bg-primary-light text-primary px-2 py-1 rounded-full">居家</span>
+                                    </div>
+                                    <p class="text-gray-600 text-sm">关闭不必要电器，使用LED节能灯，可减少碳排放约0.5kg</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button id="accept-ai-plan" class="btn-primary w-full">接受减碳计划</button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 任务完成弹窗 (默认隐藏) -->
+            <div id="task-success" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-white rounded-xl p-6 w-4/5 max-w-sm text-center">
+                    <div class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center mx-auto mb-4">
+                        <i class="fa fa-check text-4xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">任务完成！</h3>
+                    <p class="text-gray-600 mb-4">恭喜您完成任务，获得 <span id="reward-points" class="text-primary font-bold">0</span> 积分奖励！</p>
+                    <button onclick="closeSuccessPopup()" class="btn-primary w-full">确定</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==================== 碳资产账户详情页 ==================== -->
+    <div id="carbon-assets-detail" class="max-w-md mx-auto bg-white min-h-screen relative pb-20 hidden">
+        <!-- 顶部导航栏 -->
+        <header class="bg-primary text-white p-4 sticky top-0 z-10 shadow-md">
+            <div class="flex items-center">
+                <button onclick="backToHomeFromAssets()" class="mr-4">
+                    <i class="fa fa-arrow-left text-lg"></i>
+                </button>
+                <h1 class="text-xl font-bold">碳资产账户</h1>
+            </div>
+        </header>
+
+        <!-- 账户概览 -->
+        <main class="p-4">
+            <section class="mb-6">
+                <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-4 text-white shadow-lg">
+                    <div class="text-center mb-4">
+                        <p class="text-sm opacity-90">总碳积分</p>
+                        <p class="text-4xl font-bold mt-1">2,580</p>
+                        <p class="text-sm opacity-90 mt-1">≈ 减少 258kg 碳排放</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4 mt-4">
+                        <div class="text-center">
+                            <p class="text-sm opacity-90">本周新增</p>
+                            <p class="text-xl font-bold mt-1">+320</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm opacity-90">累计兑换</p>
+                            <p class="text-xl font-bold mt-1">-150</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm opacity-90">待生效</p>
+                            <p class="text-xl font-bold mt-1">+80</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 快速操作 -->
+            <section class="mb-6">
+                <div class="bg-white rounded-xl shadow-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">快速操作</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="navigateTo('exchange')" class="bg-neutral hover:bg-primary-light transition-all duration-300 rounded-lg p-3 flex flex-col items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center mb-2">
+                                <i class="fa fa-gift text-white"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-800">积分兑换</span>
+                        </button>
+                        <button onclick="navigateToTransfer()" class="bg-neutral hover:bg-primary-light transition-all duration-300 rounded-lg p-3 flex flex-col items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center mb-2">
+                                <i class="fa fa-exchange text-white"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-800">积分转让</span>
+                        </button>
+                        <button onclick="navigateTo('donate')" class="bg-neutral hover:bg-primary-light transition-all duration-300 rounded-lg p-3 flex flex-col items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center mb-2">
+                                <i class="fa fa-heart text-white"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-800">公益捐赠</span>
+                        </button>
+                        <button onclick="navigateToHistory()" class="bg-neutral hover:bg-primary-light transition-all duration-300 rounded-lg p-3 flex flex-col items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center mb-2">
+                                <i class="fa fa-history text-white"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-800">交易记录</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 积分明细标签页 -->
+            <section class="mb-6">
+                <div class="flex border-b border-gray-200 mb-4">
+                    <button id="tab-points" class="tab-button active px-4 py-2 font-medium text-primary border-b-2 border-primary transition-all duration-300">积分明细</button>
+                    <button id="tab-exchange" class="tab-button px-4 py-2 font-medium text-gray-500 transition-all duration-300">兑换记录</button>
+                    <button id="tab-achievements" class="tab-button px-4 py-2 font-medium text-gray-500 transition-all duration-300">环保成就</button>
+                </div>
+                
+                <!-- 积分明细内容 -->
+                <div id="points-content" class="tab-content">
+                    <div class="mb-4">
+                        <h4 class="font-bold text-gray-800 mb-3">今日积分变动</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 bg-neutral rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center mr-3">
+                                        <i class="fa fa-bicycle text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">绿色出行</p>
+                                        <p class="text-xs text-gray-500">骑行5公里</p>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-primary">+20</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center p-3 bg-neutral rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center mr-3">
+                                        <i class="fa fa-trash text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">垃圾分类</p>
+                                        <p class="text-xs text-gray-500">正确分类3次</p>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-primary">+15</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-3">本周积分记录</h4>
+                        <div class="space-y-3">
+                            <!-- 记录项目 -->
+                            <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                                <div>
+                                    <p class="font-medium text-gray-800">环保知识问答</p>
+                                    <p class="text-xs text-gray-500">2023-10-26 09:30</p>
+                                </div>
+                                <span class="font-bold text-primary">+30</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                                <div>
+                                    <p class="font-medium text-gray-800">节能电器使用</p>
+                                    <p class="text-xs text-gray-500">2023-10-25 18:15</p>
+                                </div>
+                                <span class="font-bold text-primary">+25</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                                <div>
+                                    <p class="font-medium text-gray-800">素食日挑战</p>
+                                    <p class="text-xs text-gray-500">2023-10-24 12:00</p>
+                                </div>
+                                <span class="font-bold text-primary">+50</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                                <div>
+                                    <p class="font-medium text-gray-800">二手物品交易</p>
+                                    <p class="text-xs text-gray-500">2023-10-23 14:20</p>
+                                </div>
+                                <span class="font-bold text-primary">+40</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                                <div>
+                                    <p class="font-medium text-gray-800">兑换环保袋</p>
+                                    <p class="text-xs text-gray-500">2023-10-22 10:45</p>
+                                </div>
+                                <span class="font-bold text-red-500">-30</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 兑换记录内容 -->
+                <div id="exchange-content" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h4 class="font-bold text-gray-800 mb-3">可兑换商品</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="border border-gray-200 rounded-lg p-3 hover:shadow-card-hover transition-all duration-300 cursor-pointer">
+                                <div class="w-full h-24 bg-neutral rounded-md mb-2 flex items-center justify-center">
+                                    <i class="fa fa-shopping-bag text-3xl text-primary"></i>
+                                </div>
+                                <h5 class="font-bold text-gray-800 text-sm mb-1">环保购物袋</h5>
+                                <p class="text-xs text-gray-500 mb-2">可重复使用</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-primary font-bold text-sm">30 积分</span>
+                                    <button class="text-xs bg-primary text-white px-2 py-1 rounded">兑换</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 hover:shadow-card-hover transition-all duration-300 cursor-pointer">
+                                <div class="w-full h-24 bg-neutral rounded-md mb-2 flex items-center justify-center">
+                                    <i class="fa fa-leaf text-3xl text-primary"></i>
+                                </div>
+                                <h5 class="font-bold text-gray-800 text-sm mb-1">绿植盆栽</h5>
+                                <p class="text-xs text-gray-500 mb-2">净化空气</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-primary font-bold text-sm">80 积分</span>
+                                    <button class="text-xs bg-primary text-white px-2 py-1 rounded">兑换</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 hover:shadow-card-hover transition-all duration-300 cursor-pointer">
+                                <div class="w-full h-24 bg-neutral rounded-md mb-2 flex items-center justify-center">
+                                    <i class="fa fa-tint text-3xl text-primary"></i>
+                                </div>
+                                <h5 class="font-bold text-gray-800 text-sm mb-1">不锈钢水杯</h5>
+                                <p class="text-xs text-gray-500 mb-2">减少塑料使用</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-primary font-bold text-sm">120 积分</span>
+                                    <button class="text-xs bg-primary text-white px-2 py-1 rounded">兑换</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 hover:shadow-card-hover transition-all duration-300 cursor-pointer">
+                                <div class="w-full h-24 bg-neutral rounded-md mb-2 flex items-center justify-center">
+                                    <i class="fa fa-bicycle text-3xl text-primary"></i>
+                                </div>
+                                <h5 class="font-bold text-gray-800 text-sm mb-1">共享单车月卡</h5>
+                                <p class="text-xs text-gray-500 mb-2">绿色出行</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-primary font-bold text-sm">150 积分</span>
+                                    <button class="text-xs bg-primary text-white px-2 py-1 rounded">兑换</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-3">最近兑换记录</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-neutral flex items-center justify-center mr-3">
+                                        <i class="fa fa-shopping-bag text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">环保购物袋</p>
+                                        <p class="text-xs text-gray-500">2023-10-22 10:45</p>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-red-500">-30</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-neutral flex items-center justify-center mr-3">
+                                        <i class="fa fa-coffee text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">咖啡杯折扣券</p>
+                                        <p class="text-xs text-gray-500">2023-10-18 15:20</p>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-red-500">-20</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-neutral flex items-center justify-center mr-3">
+                                        <i class="fa fa-book text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">环保书籍</p>
+                                        <p class="text-xs text-gray-500">2023-10-10 11:30</p>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-red-500">-60</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 环保成就内容 -->
+                <div id="achievements-content" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h4 class="font-bold text-gray-800 mb-3">已获得成就</h4>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="flex flex-col items-center" onclick="showAchievementDetail('newbie')">
+                                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center mb-2 relative">
+                                    <i class="fa fa-leaf text-3xl text-green-600"></i>
+                                    <div class="absolute -top-1 -right-1 w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+                                        <i class="fa fa-check text-xs text-primary-dark"></i>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-800">新手上路</span>
+                                <span class="text-xs text-gray-500">首次完成任务</span>
+                            </div>
+                            
+                            <div class="flex flex-col items-center" onclick="showAchievementDetail('expert')">
+                                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center mb-2 relative">
+                                    <i class="fa fa-tree text-3xl text-green-600"></i>
+                                    <div class="absolute -top-1 -right-1 w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+                                        <i class="fa fa-check text-xs text-primary-dark"></i>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-800">环保达人</span>
+                                <span class="text-xs text-gray-500">连续7天打卡</span>
+                            </div>
+                            
+                            <div class="flex flex-col items-center" onclick="showAchievementDetail('guardian')">
+                                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center mb-2 relative">
+                                    <i class="fa fa-shield text-3xl text-green-600"></i>
+                                    <div class="absolute -top-1 -right-1 w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+                                        <i class="fa fa-check text-xs text-primary-dark"></i>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-800">生态守护者</span>
+                                <span class="text-xs text-gray-500">减少100kg碳排放</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-3">待完成成就</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center p-3 bg-neutral rounded-lg" onclick="showAchievementDetail('influencer')">
+                                <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                    <i class="fa fa-users text-2xl text-gray-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="font-medium text-gray-800">影响力先锋</span>
+                                        <span class="text-xs text-primary">+200积分</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mb-2">邀请3位好友加入</p>
+                                    <div class="progress-bar">
+                                        <div class="progress-value" style="width: 33%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">1/3 已完成</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center p-3 bg-neutral rounded-lg" onclick="showAchievementDetail('hero')">
+                                <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                    <i class="fa fa-trophy text-2xl text-gray-400"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="font-medium text-gray-800">碳中和英雄</span>
+                                        <span class="text-xs text-primary">+500积分</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mb-2">累计减少500kg碳排放</p>
+                                    <div class="progress-bar">
+                                        <div class="progress-value" style="width: 52%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">258/500 kg</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 碳积分价值说明 -->
+            <section class="mb-6">
+                <div class="bg-white rounded-xl shadow-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">碳积分价值</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center mr-3 mt-1">
+                                <i class="fa fa-leaf text-primary text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">1碳积分 ≈ 减少0.1kg碳排放</p>
+                                <p class="text-xs text-gray-500">基于国际碳减排标准计算</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center mr-3 mt-1">
+                                <i class="fa fa-tree text-primary text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">100碳积分 ≈ 种植1棵树苗</p>
+                                <p class="text-xs text-gray-500">年碳吸收量约10kg</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center mr-3 mt-1">
+                                <i class="fa fa-car text-primary text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">50碳积分 ≈ 少开10公里车</p>
+                                <p class="text-xs text-gray-500">基于汽油车平均碳排放</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ==================== 公益捐赠页面 ==================== -->
+    <div id="donate-page" class="max-w-md mx-auto bg-white min-h-screen relative pb-20 hidden">
+        <!-- 顶部导航栏 -->
+        <header class="bg-primary text-white p-4 sticky top-0 z-10 shadow-md">
+            <div class="flex items-center">
+                <button onclick="navigateTo('exchange')" class="mr-4">
+                    <i class="fa fa-arrow-left text-lg"></i>
+                </button>
+                <h1 class="text-xl font-bold">公益捐赠</h1>
+            </div>
+        </header>
+
+        <!-- 内容区域 -->
+        <main class="p-4">
+            <!-- 捐赠说明 -->
+            <section class="mb-6">
+                <div class="bg-gradient-to-r from-green-100 to-blue-100 rounded-xl p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mr-3">
+                            <i class="fa fa-heart text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">爱心捐赠，绿色未来</h3>
+                            <p class="text-sm text-gray-600">您的积分可以转化为环保项目的实际支持</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">每100积分可转化为10元环保基金，用于支持植树造林、清洁海洋、野生动物保护等公益项目。</p>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-sm text-gray-700">当前可用积分</p>
+                            <p class="text-2xl font-bold text-primary">2,580</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-700">可捐赠金额</p>
+                            <p class="text-2xl font-bold text-green-600">¥258</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 捐赠项目 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">捐赠项目</h2>
+                    <button class="text-primary text-sm flex items-center">
+                        全部项目 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- 项目1：植树造林 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover" onclick="selectDonateProject('tree')">
+                        <div class="flex items-start mb-3">
+                            <div class="w-16 h-16 rounded-lg bg-green-50 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fa fa-tree text-2xl text-green-600"></i>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-800">植树造林计划</h3>
+                                    <span class="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded">进行中</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">在荒漠化地区种植树木，恢复生态系统，每100积分可种植1棵树苗。</p>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs text-gray-500">已种植: <span class="font-bold text-green-600">8,256棵</span></p>
+                                        <p class="text-xs text-gray-500">目标: 10,000棵</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs text-gray-500">需积分: <span class="font-bold text-primary">100/棵</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="progress-bar mt-2">
+                            <div class="progress-value" style="width: 82%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 项目2：清洁海洋 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover" onclick="selectDonateProject('ocean')">
+                        <div class="flex items-start mb-3">
+                            <div class="w-16 h-16 rounded-lg bg-blue-50 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fa fa-tint text-2xl text-blue-600"></i>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-800">海洋清洁行动</h3>
+                                    <span class="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded">新项目</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">清理海洋塑料垃圾，保护海洋生态系统，每50积分可清理1公斤海洋垃圾。</p>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs text-gray-500">已清理: <span class="font-bold text-blue-600">3,420公斤</span></p>
+                                        <p class="text-xs text-gray-500">目标: 5,000公斤</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs text-gray-500">需积分: <span class="font-bold text-primary">50/公斤</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="progress-bar mt-2">
+                            <div class="progress-value" style="width: 68%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 项目3：野生动物保护 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover" onclick="selectDonateProject('animal')">
+                        <div class="flex items-start mb-3">
+                            <div class="w-16 h-16 rounded-lg bg-yellow-50 flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fa fa-paw text-2xl text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-800">野生动物保护</h3>
+                                    <span class="bg-yellow-100 text-yellow-600 text-xs px-2 py-0.5 rounded">长期项目</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">保护濒危野生动物栖息地，支持野生动物救助，每200积分可支持1天的保护工作。</p>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-xs text-gray-500">已保护: <span class="font-bold text-yellow-600">128天</span></p>
+                                        <p class="text-xs text-gray-500">持续进行中</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs text-gray-500">需积分: <span class="font-bold text-primary">200/天</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="progress-bar mt-2">
+                            <div class="progress-value" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 捐赠金额选择 -->
+            <section class="mb-6">
+                <div class="bg-white rounded-xl shadow-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">选择捐赠金额</h3>
+                    
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <button onclick="selectDonateAmount(100)" class="border border-primary text-primary font-medium py-3 rounded-lg hover:bg-primary-light transition-all duration-300">
+                            100积分
+                        </button>
+                        <button onclick="selectDonateAmount(200)" class="border border-primary text-primary font-medium py-3 rounded-lg hover:bg-primary-light transition-all duration-300">
+                            200积分
+                        </button>
+                        <button onclick="selectDonateAmount(500)" class="border border-primary text-primary font-medium py-3 rounded-lg hover:bg-primary-light transition-all duration-300">
+                            500积分
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="text-gray-700 mb-2 block">自定义捐赠积分</label>
+                        <div class="flex items-center">
+                            <input type="number" id="custom-donate-amount" min="10" max="2580" class="flex-1 border border-gray-300 rounded-l-lg p-3 text-gray-600" placeholder="输入积分数量" value="100">
+                            <span class="bg-gray-100 border border-gray-300 border-l-0 rounded-r-lg p-3 text-gray-600">积分</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">最少10积分，最多2580积分</p>
+                    </div>
+                    
+                    <div class="bg-green-50 rounded-lg p-4 mb-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-medium text-gray-800">捐赠效果</p>
+                                <p id="donate-effect" class="text-sm text-gray-600">100积分 = 种植1棵树苗</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-gray-700">当前选择</p>
+                                <p id="selected-donate-amount" class="text-xl font-bold text-primary">100 积分</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="confirmDonate()" class="btn-primary w-full">确认捐赠</button>
+                </div>
+            </section>
+
+            <!-- 捐赠记录 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">我的捐赠记录</h2>
+                    <button onclick="viewAllDonations()" class="text-primary text-sm flex items-center">
+                        全部记录 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-3">
+                    <!-- 记录1 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                <i class="fa fa-tree text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">植树造林计划</p>
+                                <p class="text-xs text-gray-500">2023-10-20 · 种植2棵树苗</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-red-500 font-bold">-200</span>
+                            <div class="text-xs text-green-500">已生效</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 记录2 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                <i class="fa fa-tint text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">海洋清洁行动</p>
+                                <p class="text-xs text-gray-500">2023-10-15 · 清理4公斤垃圾</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-red-500 font-bold">-200</span>
+                            <div class="text-xs text-green-500">已生效</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 记录3 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
+                                <i class="fa fa-paw text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">野生动物保护</p>
+                                <p class="text-xs text-gray-500">2023-10-10 · 支持1天保护工作</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-red-500 font-bold">-200</span>
+                            <div class="text-xs text-green-500">已生效</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 捐赠证书 -->
+            <section class="mb-6">
+                <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-4 text-white text-center">
+                    <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                        <i class="fa fa-certificate text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">环保爱心证书</h3>
+                    <p class="text-sm opacity-90 mb-4">感谢您为环保事业做出的贡献，您的每一次捐赠都会让地球更美好</p>
+                    <button onclick="viewDonateCertificate()" class="btn-secondary w-full text-primary-dark bg-white hover:bg-white/90">
+                        查看我的证书
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ==================== 环保社区页面 ==================== -->
+    <div id="community-page" class="max-w-md mx-auto bg-white min-h-screen relative pb-20 hidden">
+        <!-- 顶部导航栏 -->
+        <header class="bg-primary text-white p-4 sticky top-0 z-10 shadow-md">
+            <div class="flex items-center">
+                <button onclick="navigateTo('explore')" class="mr-4">
+                    <i class="fa fa-arrow-left text-lg"></i>
+                </button>
+                <h1 class="text-xl font-bold">环保社区</h1>
+            </div>
+        </header>
+
+        <!-- 内容区域 -->
+        <main class="p-4">
+            <!-- 社区概览 -->
+            <section class="mb-6">
+                <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-4 text-white">
+                    <div class="flex items-center mb-4">
+                        <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mr-4">
+                            <i class="fa fa-users text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">绿途环保社区</h2>
+                            <p class="text-sm opacity-90">与 <span class="font-bold">8,256</span> 位环保伙伴同行</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-sm opacity-90">今日活跃</p>
+                            <p class="text-xl font-bold mt-1">1,248</p>
+                        </div>
+                        <div>
+                            <p class="text-sm opacity-90">社区活动</p>
+                            <p class="text-xl font-bold mt-1">32</p>
+                        </div>
+                        <div>
+                            <p class="text-sm opacity-90">话题讨论</p>
+                            <p class="text-xl font-bold mt-1">156</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 加入社区 -->
+            <section class="mb-6">
+                <div class="bg-white rounded-xl shadow-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">加入社区</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center p-3 bg-green-50 rounded-lg">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                <i class="fa fa-users text-green-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-800">您尚未加入社区</p>
+                                <p class="text-xs text-gray-500">加入后可与环保伙伴交流互动</p>
+                            </div>
+                            <button onclick="joinCommunity()" class="btn-primary text-sm py-1 px-4">立即加入</button>
+                        </div>
+                        
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fa fa-check-circle text-blue-600 mr-2"></i>
+                                <span class="font-medium text-gray-800">加入社区福利</span>
+                            </div>
+                            <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                <li>与环保达人交流经验</li>
+                                <li>获取专属社区活动资格</li>
+                                <li>发布动态获得额外积分</li>
+                                <li>参与话题讨论赢取奖励</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 热门话题 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">热门话题</h2>
+                    <button onclick="viewAllTopics()" class="text-primary text-sm flex items-center">
+                        更多话题 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-3">
+                    <!-- 话题1 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover">
+                        <div class="flex items-start mb-3">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fa fa-leaf text-green-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-800">家庭垃圾分类经验分享</h3>
+                                    <span class="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded">热门</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">分享你的家庭垃圾分类小技巧，帮助更多人正确分类...</p>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <i class="fa fa-user text-gray-400 text-xs mr-1"></i>
+                                        <span class="text-xs text-gray-500">环保达人 · 张伟</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fa fa-comment text-gray-400 text-xs mr-1"></i>
+                                        <span class="text-xs text-gray-500">86 讨论</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 话题2 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover">
+                        <div class="flex items-start mb-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fa fa-bicycle text-blue-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-800">绿色出行挑战打卡</h3>
+                                    <span class="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded">进行中</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">连续7天绿色出行打卡，坚持下来的伙伴有额外奖励...</p>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <i class="fa fa-user text-gray-400 text-xs mr-1"></i>
+                                        <span class="text-xs text-gray-500">社区管理员</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fa fa-comment text-gray-400 text-xs mr-1"></i>
+                                        <span class="text-xs text-gray-500">124 讨论</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 话题3 -->
+                    <div class="bg-white rounded-xl shadow-card p-4 card-hover">
+                        <div class="flex items-start mb-3">
+                            <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fa fa-lightbulb-o text-yellow-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-gray-800">旧物改造创意大赛</h3>
+                                    <span class="bg-yellow-100 text-yellow-600 text-xs px-2 py-0.5 rounded">活动</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">分享你的旧物改造作品，赢取环保创意大奖...</p>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <i class="fa fa-user text-gray-400 text-xs mr-1"></i>
+                                        <span class="text-xs text-gray-500">创意工坊</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fa fa-comment text-gray-400 text-xs mr-1"></i>
+                                        <span class="text-xs text-gray-500">203 讨论</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 社区活动 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">近期社区活动</h2>
+                    <button onclick="viewAllCommunityActivities()" class="text-primary text-sm flex items-center">
+                        全部活动 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto pb-4 -mx-2 px-2">
+                    <div class="flex space-x-4">
+                        <!-- 活动1 -->
+                        <div class="flex-shrink-0 w-64 bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 card-hover">
+                            <div class="flex items-center mb-3">
+                                <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mr-3">
+                                    <i class="fa fa-tree text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">周末植树活动</h3>
+                                    <p class="text-xs text-gray-500">本周六 · 城市森林公园</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4">社区组织的植树活动，共同为城市添绿</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-green-600 font-bold"><i class="fa fa-users mr-1"></i> 24/50人</span>
+                                <button class="text-xs bg-primary text-white px-3 py-1 rounded-full">我要报名</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 活动2 -->
+                        <div class="flex-shrink-0 w-64 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 card-hover">
+                            <div class="flex items-center mb-3">
+                                <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mr-3">
+                                    <i class="fa fa-recycle text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">环保手工坊</h3>
+                                    <p class="text-xs text-gray-500">本周日 · 社区活动中心</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4">学习用废旧物品制作实用家居用品</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-blue-600 font-bold"><i class="fa fa-users mr-1"></i> 18/30人</span>
+                                <button class="text-xs bg-primary text-white px-3 py-1 rounded-full">我要报名</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 社区达人 -->
+            <section class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">社区达人</h2>
+                    <button onclick="viewAllCommunityStars()" class="text-primary text-sm flex items-center">
+                        查看全部 <i class="fa fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+                
+                <div class="flex overflow-x-auto space-x-4 pb-2">
+                    <!-- 达人1 -->
+                    <div class="flex-shrink-0 flex flex-col items-center">
+                        <div class="relative">
+                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center mb-2">
+                                <i class="fa fa-user text-green-600 text-xl"></i>
+                            </div>
+                            <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                                <i class="fa fa-star text-white text-xs"></i>
+                            </div>
+                        </div>
+                        <span class="text-sm font-medium text-gray-800">环保先锋</span>
+                        <span class="text-xs text-gray-500">累计积分: 5,280</span>
+                    </div>
+                    
+                    <!-- 达人2 -->
+                    <div class="flex-shrink-0 flex flex-col items-center">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mb-2">
+                            <i class="fa fa-user text-blue-600 text-xl"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-800">减碳达人</span>
+                        <span class="text-xs text-gray-500">减少碳排放: 520kg</span>
+                    </div>
+                    
+                    <!-- 达人3 -->
+                    <div class="flex-shrink-0 flex flex-col items-center">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center mb-2">
+                            <i class="fa fa-user text-yellow-600 text-xl"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-800">活动组织者</span>
+                        <span class="text-xs text-gray-500">组织活动: 12场</span>
+                    </div>
+                    
+                    <!-- 达人4 -->
+                    <div class="flex-shrink-0 flex flex-col items-center">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center mb-2">
+                            <i class="fa fa-user text-pink-600 text-xl"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-800">知识分享官</span>
+                        <span class="text-xs text-gray-500">发布内容: 86篇</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 发布动态 -->
+            <section class="mb-6">
+                <div class="bg-white rounded-xl shadow-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">发布动态</h3>
+                    <textarea class="w-full border border-gray-300 rounded-lg p-3 text-gray-600 mb-3" rows="3" placeholder="分享您的环保心得、经验或疑问..."></textarea>
+                    <div class="flex justify-between items-center">
+                        <div class="flex space-x-2">
+                            <button class="text-gray-500 hover:text-primary">
+                                <i class="fa fa-camera"></i>
+                            </button>
+                            <button class="text-gray-500 hover:text-primary">
+                                <i class="fa fa-map-marker"></i>
+                            </button>
+                            <button class="text-gray-500 hover:text-primary">
+                                <i class="fa fa-tag"></i>
+                            </button>
+                        </div>
+                        <button class="btn-primary text-sm py-1 px-4">发布</button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">发布优质内容可获得额外积分奖励</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 上报成功弹窗 -->
+    <div id="report-success" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-6 w-4/5 max-w-sm text-center">
+            <div class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center mx-auto mb-4">
+                <i class="fa fa-check text-4xl text-primary"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">上报成功！</h3>
+            <p class="text-gray-600 mb-4">您的上报已提交，审核通过后将获得积分奖励</p>
+            <button onclick="closeReportSuccess()" class="btn-primary w-full">确定</button>
+        </div>
+    </div>
+
+    <!-- 兑换确认弹窗 -->
+    <div id="exchange-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-6 w-4/5 max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="exchange-title" class="text-xl font-bold text-gray-800">确认兑换</h3>
+                <button onclick="closeExchangeModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="text-center mb-4">
+                <div id="exchange-icon" class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+                    <i id="exchange-icon-fa" class="text-3xl text-green-600"></i>
+                </div>
+                <h4 id="exchange-item-name" class="font-bold text-gray-800 mb-1">商品名称</h4>
+                <p id="exchange-item-desc" class="text-gray-600 text-sm mb-2">商品描述</p>
+                <div class="flex justify-center items-center mt-2">
+                    <span class="text-gray-700 mr-2">消耗积分：</span>
+                    <span id="exchange-cost" class="text-primary font-bold text-xl">0</span>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-700">当前积分</span>
+                    <span class="font-bold text-primary">2,580</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-700">兑换后剩余</span>
+                    <span id="exchange-remaining" class="font-bold text-primary">2,580</span>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <button onclick="confirmExchange()" class="btn-primary w-full">确认兑换</button>
+                <button onclick="closeExchangeModal()" class="btn-secondary w-full">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成就详情弹窗 -->
+    <div id="achievement-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-6 w-4/5 max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="achievement-title" class="text-xl font-bold text-gray-800">成就详情</h3>
+                <button onclick="closeAchievementModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="text-center mb-4">
+                <div id="achievement-icon" class="w-20 h-20 rounded-full bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center mx-auto mb-3">
+                    <i id="achievement-icon-fa" class="text-3xl text-green-600"></i>
+                </div>
+                <div id="achievement-badge" class="inline-block bg-accent text-primary-dark text-xs font-bold px-3 py-1 rounded-full mb-2">已获得</div>
+            </div>
+            
+            <div class="space-y-3 mb-6">
+                <div>
+                    <h4 class="text-gray-700 font-medium mb-1">成就描述</h4>
+                    <p id="achievement-description" class="text-gray-600 text-sm"></p>
+                </div>
+                
+                <div>
+                    <h4 class="text-gray-700 font-medium mb-1">达成条件</h4>
+                    <p id="achievement-requirements" class="text-gray-600 text-sm"></p>
+                </div>
+                
+                <div>
+                    <h4 class="text-gray-700 font-medium mb-1">奖励</h4>
+                    <p id="achievement-rewards" class="text-primary font-bold"></p>
+                </div>
+                
+                <div id="achievement-progress-container" class="hidden">
+                    <h4 class="text-gray-700 font-medium mb-1">进度</h4>
+                    <div class="progress-bar">
+                        <div id="achievement-progress-bar" class="progress-value"></div>
+                    </div>
+                    <p id="achievement-progress-text" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+            </div>
+            
+            <button onclick="closeAchievementModal()" class="btn-primary w-full">确定</button>
+        </div>
+    </div>
+
+    <!-- 捐赠确认弹窗 -->
+    <div id="donate-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-6 w-4/5 max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="donate-title" class="text-xl font-bold text-gray-800">确认捐赠</h3>
+                <button onclick="closeDonateModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="text-center mb-4">
+                <div id="donate-icon" class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+                    <i id="donate-icon-fa" class="text-3xl text-green-600"></i>
+                </div>
+                <h4 id="donate-project-name" class="font-bold text-gray-800 mb-1">捐赠项目</h4>
+                <p id="donate-project-desc" class="text-gray-600 text-sm mb-2">项目描述</p>
+                <div class="flex justify-center items-center mt-2">
+                    <span class="text-gray-700 mr-2">捐赠积分：</span>
+                    <span id="donate-amount" class="text-primary font-bold text-xl">0</span>
+                </div>
+                <p id="donate-effect-text" class="text-sm text-gray-600 mt-2"></p>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-700">当前积分</span>
+                    <span class="font-bold text-primary">2,580</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-700">捐赠后剩余</span>
+                    <span id="donate-remaining" class="font-bold text-primary">2,580</span>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <button onclick="confirmDonation()" class="btn-primary w-full">确认捐赠</button>
+                <button onclick="closeDonateModal()" class="btn-secondary w-full">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加入社区成功弹窗 -->
+    <div id="community-success" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-6 w-4/5 max-w-sm text-center">
+            <div class="w-20 h-20 rounded-full bg-primary-light flex items-center justify-center mx-auto mb-4">
+                <i class="fa fa-check text-4xl text-primary"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">加入成功！</h3>
+            <p class="text-gray-600 mb-4">欢迎加入绿途环保社区，您已获得<span class="text-primary font-bold">+50积分</span>奖励！</p>
+            <button onclick="closeCommunitySuccess()" class="btn-primary w-full">开始探索社区</button>
+        </div>
+    </div>
+
+    <script>
+        // 页面导航状态管理
+        let currentPage = 'home';
+        
+        // 兑换商品数据
+        const exchangeItems = {
+            1: {
+                name: '环保购物袋',
+                description: '可重复使用，减少塑料袋使用',
+                cost: 30,
+                icon: 'fa-shopping-bag',
+                stock: 28
+            },
+            2: {
+                name: '不锈钢水杯',
+                description: '保温保冷，减少一次性杯子',
+                cost: 120,
+                icon: 'fa-tint',
+                stock: 15
+            },
+            3: {
+                name: '绿植盆栽',
+                description: '净化空气，美化环境，小盆多肉植物',
+                cost: 80,
+                icon: 'fa-leaf',
+                stock: 22
+            },
+            4: {
+                name: '共享单车月卡',
+                description: '30天无限次骑行，绿色出行首选',
+                cost: 150,
+                icon: 'fa-bicycle',
+                stock: 35
+            },
+            5: {
+                name: '咖啡杯折扣券',
+                description: '自带杯购买咖啡享5折优惠',
+                cost: 20,
+                icon: 'fa-coffee',
+                stock: 50
+            },
+            6: {
+                name: '环保书籍',
+                description: '《零浪费生活》纸质书籍',
+                cost: 60,
+                icon: 'fa-book',
+                stock: 12
+            }
+        };
+        
+        // 当前选中的兑换商品ID
+        let currentExchangeItemId = null;
+        
+        // 捐赠项目数据
+        const donateProjects = {
+            tree: {
+                name: '植树造林计划',
+                description: '在荒漠化地区种植树木，恢复生态系统',
+                effect: '100积分 = 种植1棵树苗',
+                icon: 'fa-tree',
+                unit: '棵',
+                costPerUnit: 100
+            },
+            ocean: {
+                name: '海洋清洁行动',
+                description: '清理海洋塑料垃圾，保护海洋生态系统',
+                effect: '50积分 = 清理1公斤海洋垃圾',
+                icon: 'fa-tint',
+                unit: '公斤',
+                costPerUnit: 50
+            },
+            animal: {
+                name: '野生动物保护',
+                description: '保护濒危野生动物栖息地，支持野生动物救助',
+                effect: '200积分 = 支持1天的保护工作',
+                icon: 'fa-paw',
+                unit: '天',
+                costPerUnit: 200
+            }
+        };
+        
+        // 当前选中的捐赠项目
+        let currentDonateProject = null;
+        let currentDonateAmount = 100;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化图表
+            initCarbonChart();
+            initTravelChart();
+            
+            // 绑定任务提交按钮事件
+            bindTaskButtons();
+            
+            // 绑定图片上传预览事件
+            const photoUpload = document.getElementById('photo-upload');
+            if (photoUpload) {
+                photoUpload.addEventListener('change', function(e) {
+                    if (e.target.files && e.target.files[0]) {
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            document.getElementById('preview-image').src = e.target.result;
+                            document.getElementById('photo-preview').classList.remove('hidden');
+                        }
+                        
+                        reader.readAsDataURL(e.target.files[0]);
+                    }
+                });
+            }
+            
+            // 初始化碳资产账户标签页（如果页面已存在）
+            if (document.querySelector('.tab-button')) {
+                initCarbonAssetsTabs();
+            }
+            
+            // 绑定自定义捐赠金额输入事件
+            const customDonateInput = document.getElementById('custom-donate-amount');
+            if (customDonateInput) {
+                customDonateInput.addEventListener('input', function() {
+                    let value = parseInt(this.value) || 100;
+                    if (value < 10) value = 10;
+                    if (value > 2580) value = 2580;
+                    this.value = value;
+                    selectDonateAmount(value);
+                });
+            }
+        });
+
+        // 页面导航函数
+        function navigateTo(page) {
+            console.log('Navigating to:', page);
+            
+            // 隐藏所有页面
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('explore-page').classList.add('hidden');
+            document.getElementById('profile-page').classList.add('hidden');
+            document.getElementById('report-page').classList.add('hidden');
+            document.getElementById('exchange-page').classList.add('hidden');
+            document.getElementById('task-detail').classList.add('hidden');
+            document.getElementById('carbon-assets-detail').classList.add('hidden');
+            document.getElementById('donate-page').classList.add('hidden');
+            document.getElementById('community-page').classList.add('hidden');
+            
+            // 更新当前页面状态
+            currentPage = page;
+            
+            // 更新底部导航栏状态
+            updateBottomNav(page);
+            
+            // 显示目标页面
+            switch(page) {
+                case 'home':
+                    document.getElementById('app').classList.remove('hidden');
+                    break;
+                case 'explore':
+                    document.getElementById('explore-page').classList.remove('hidden');
+                    break;
+                case 'profile':
+                    document.getElementById('profile-page').classList.remove('hidden');
+                    break;
+                case 'report':
+                    document.getElementById('report-page').classList.remove('hidden');
+                    // 重置上报内容区域
+                    document.getElementById('report-content').classList.add('hidden');
+                    break;
+                case 'exchange':
+                    document.getElementById('exchange-page').classList.remove('hidden');
+                    break;
+                case 'donate':
+                    document.getElementById('donate-page').classList.remove('hidden');
+                    // 默认选中植树造林项目
+                    selectDonateProject('tree');
+                    selectDonateAmount(100);
+                    break;
+                case 'community':
+                    document.getElementById('community-page').classList.remove('hidden');
+                    break;
+            }
+        }
+
+        // 更新底部导航栏状态
+        function updateBottomNav(activePage) {
+            const navButtons = document.querySelectorAll('nav button');
+            navButtons.forEach(button => {
+                button.classList.remove('nav-active');
+                button.classList.add('nav-inactive');
+                
+                // 特殊处理中间的+按钮
+                if (button.querySelector('.fa-plus')) {
+                    button.classList.remove('nav-inactive');
+                }
+            });
+            
+            // 设置当前活动页面
+            let targetButton;
+            switch(activePage) {
+                case 'home':
+                    targetButton = navButtons[0];
+                    break;
+                case 'explore':
+                    targetButton = navButtons[1];
+                    break;
+                case 'report':
+                    // 中间的上报按钮不做高亮
+                    break;
+                case 'exchange':
+                    targetButton = navButtons[3];
+                    break;
+                case 'profile':
+                    targetButton = navButtons[4];
+                    break;
+            }
+            
+            if (targetButton) {
+                targetButton.classList.remove('nav-inactive');
+                targetButton.classList.add('nav-active');
+            }
+        }
+
+        // 选择上报类型
+        function selectReportType(type) {
+            const reportContent = document.getElementById('report-content');
+            reportContent.classList.remove('hidden');
+            
+            let title, reward;
+            switch(type) {
+                case 'garbage':
+                    title = '垃圾分类上报';
+                    reward = '+50 积分';
+                    break;
+                case 'energy':
+                    title = '节能行为上报';
+                    reward = '+30 积分';
+                    break;
+                case 'travel':
+                    title = '绿色出行上报';
+                    reward = '+30 积分';
+                    break;
+                case 'other':
+                    title = '环保行为上报';
+                    reward = '+20 积分';
+                    break;
+            }
+            
+            document.getElementById('report-title').textContent = title;
+            document.getElementById('report-reward').textContent = reward;
+            
+            // 滚动到上报区域
+            reportContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // 提交上报
+        function submitReport() {
+            const preview = document.getElementById('photo-preview');
+            if (preview.classList.contains('hidden')) {
+                alert('请先上传照片');
+                return;
+            }
+            
+            // 显示成功弹窗
+            document.getElementById('report-success').classList.remove('hidden');
+        }
+
+        // 关闭上报成功弹窗
+        function closeReportSuccess() {
+            const reportSuccessModal = document.getElementById('report-success');
+            if (reportSuccessModal) {
+                reportSuccessModal.classList.add('hidden');
+            }
+            // 重置表单
+            removePhoto();
+            document.getElementById('report-description').value = '';
+            document.getElementById('report-content').classList.add('hidden');
+        }
+
+        // 移除照片
+        function removePhoto() {
+            document.getElementById('preview-image').src = '';
+            document.getElementById('photo-preview').classList.add('hidden');
+            document.getElementById('photo-upload').value = '';
+        }
+
+        // 重新拍摄照片
+        function retakePhoto() {
+            removePhoto();
+            document.getElementById('photo-upload').click();
+        }
+
+        // 查看所有上报记录
+        function viewAllReports() {
+            alert('查看所有上报记录功能开发中...');
+        }
+
+        // 兑换商品
+        function exchangeItem(itemId) {
+            const item = exchangeItems[itemId];
+            if (!item) return;
+            
+            currentExchangeItemId = itemId;
+            
+            // 更新弹窗内容
+            document.getElementById('exchange-title').textContent = '确认兑换';
+            document.getElementById('exchange-item-name').textContent = item.name;
+            document.getElementById('exchange-item-desc').textContent = item.description;
+            document.getElementById('exchange-cost').textContent = item.cost;
+            
+            // 设置图标
+            const iconElement = document.getElementById('exchange-icon-fa');
+            iconElement.className = `fa ${item.icon} text-3xl text-green-600`;
+            
+            // 计算剩余积分
+            const currentPoints = 2580;
+            const remaining = currentPoints - item.cost;
+            document.getElementById('exchange-remaining').textContent = remaining;
+            
+            // 显示弹窗
+            document.getElementById('exchange-modal').classList.remove('hidden');
+        }
+
+        // 确认兑换
+        function confirmExchange() {
+            if (!currentExchangeItemId) return;
+            
+            const item = exchangeItems[currentExchangeItemId];
+            alert(`成功兑换 ${item.name}！\n消耗积分：${item.cost}\n剩余积分：${2580 - item.cost}`);
+            closeExchangeModal();
+        }
+
+        // 关闭兑换弹窗
+        function closeExchangeModal() {
+            document.getElementById('exchange-modal').classList.add('hidden');
+            currentExchangeItemId = null;
+        }
+
+        // 导航到碳资产账户
+        function navigateToCarbonAssets() {
+            console.log('Navigating to carbon assets');
+            
+            // 隐藏所有页面
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('explore-page').classList.add('hidden');
+            document.getElementById('profile-page').classList.add('hidden');
+            document.getElementById('report-page').classList.add('hidden');
+            document.getElementById('exchange-page').classList.add('hidden');
+            document.getElementById('task-detail').classList.add('hidden');
+            document.getElementById('donate-page').classList.add('hidden');
+            document.getElementById('community-page').classList.add('hidden');
+            
+            // 显示碳资产详情页
+            document.getElementById('carbon-assets-detail').classList.remove('hidden');
+            
+            // 初始化标签页
+            setTimeout(() => {
+                initCarbonAssetsTabs();
+            }, 10);
+        }
+
+        // 从碳资产账户返回主页
+        function backToHomeFromAssets() {
+            console.log('Back to home from assets');
+            document.getElementById('carbon-assets-detail').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            updateBottomNav('home');
+        }
+
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                alert('已退出登录');
+                // 在实际应用中，这里应该跳转到登录页面
+            }
+        }
+
+        // 成就数据
+        const achievements = {
+            newbie: {
+                title: '新手上路',
+                icon: 'fa-leaf',
+                description: '开启您的环保之旅，迈出绿色生活的第一步',
+                requirements: '完成第一个环保任务',
+                rewards: '+50积分',
+                status: '已获得',
+                progress: 100
+            },
+            expert: {
+                title: '环保达人',
+                icon: 'fa-tree',
+                description: '持续参与环保活动，展现您对可持续生活的执着追求',
+                requirements: '连续7天完成环保任务打卡',
+                rewards: '+150积分 +专属徽章',
+                status: '已获得',
+                progress: 100
+            },
+            guardian: {
+                title: '生态守护者',
+                icon: 'fa-shield',
+                description: '用实际行动守护地球家园，为生态环境贡献力量',
+                requirements: '累计减少100kg碳排放',
+                rewards: '+300积分 +环保卫士称号',
+                status: '已获得',
+                progress: 100
+            },
+            influencer: {
+                title: '影响力先锋',
+                icon: 'fa-users',
+                description: '传播环保理念，影响更多人加入绿色生活',
+                requirements: '成功邀请3位好友加入绿途平台',
+                rewards: '+200积分',
+                status: '进行中',
+                progress: 33,
+                progressText: '1/3 已完成'
+            },
+            hero: {
+                title: '碳中和英雄',
+                icon: 'fa-trophy',
+                description: '为实现碳中和目标做出卓越贡献的环保先锋',
+                requirements: '累计减少500kg碳排放',
+                rewards: '+500积分 +英雄称号',
+                status: '进行中',
+                progress: 52,
+                progressText: '258/500 kg'
+            },
+            all: {
+                title: '全部成就',
+                icon: 'fa-trophy',
+                description: '查看您所有的环保成就',
+                requirements: '探索您的环保旅程',
+                rewards: '不断解锁新成就',
+                status: '探索中',
+                progress: 60
+            }
+        };
+
+        // 初始化碳排放统计图表
+        function initCarbonChart() {
+            const ctx = document.getElementById('carbonChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [{
+                        label: '减少碳排放 (kg)',
+                        data: [0.8, 1.2, 0.5, 1.8, 0.9, 1.5, 1.2],
+                        backgroundColor: '#4CAF50',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 初始化出行图表
+        function initTravelChart() {
+            const ctx = document.getElementById('travelChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [{
+                        label: '步数',
+                        data: [4500, 5280, 3800, 6100, 5280, 7500, 5280],
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 绑定任务按钮事件
+        function bindTaskButtons() {
+            // 原代码中的任务按钮绑定保持不变
+            const submitKnowledge = document.getElementById('submit-knowledge');
+            const submitReport = document.getElementById('submit-report');
+            const syncData = document.getElementById('sync-data');
+            const acceptAiPlan = document.getElementById('accept-ai-plan');
+            
+            if (submitKnowledge) {
+                submitKnowledge.addEventListener('click', function() {
+                    showSuccessPopup(30);
+                });
+            }
+            
+            if (submitReport) {
+                submitReport.addEventListener('click', function() {
+                    const preview = document.getElementById('report-preview');
+                    if (preview && preview.classList.contains('hidden')) {
+                        alert('请先上传照片');
+                        return;
+                    }
+                    showSuccessPopup(50);
+                });
+            }
+            
+            if (syncData) {
+                syncData.addEventListener('click', function() {
+                    showSuccessPopup(20);
+                });
+            }
+            
+            if (acceptAiPlan) {
+                acceptAiPlan.addEventListener('click', function() {
+                    showSuccessPopup(100);
+                });
+            }
+        }
+
+        // 导航到任务详情页
+        function navigateToTask(taskType) {
+            console.log('Navigating to task:', taskType);
+            
+            // 隐藏所有页面
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('explore-page').classList.add('hidden');
+            document.getElementById('profile-page').classList.add('hidden');
+            document.getElementById('report-page').classList.add('hidden');
+            document.getElementById('exchange-page').classList.add('hidden');
+            document.getElementById('carbon-assets-detail').classList.add('hidden');
+            document.getElementById('donate-page').classList.add('hidden');
+            document.getElementById('community-page').classList.add('hidden');
+            
+            // 显示任务详情页
+            document.getElementById('task-detail').classList.remove('hidden');
+            
+            // 隐藏所有任务互动区域
+            document.getElementById('knowledge-interaction')?.classList.add('hidden');
+            document.getElementById('report-interaction')?.classList.add('hidden');
+            document.getElementById('auto-interaction')?.classList.add('hidden');
+            document.getElementById('ai-interaction')?.classList.add('hidden');
+            
+            // 根据任务类型显示对应的互动区域
+            let taskTitle, taskDescription, taskReward, taskTime, taskIcon;
+            
+            switch(taskType) {
+                case 'knowledge':
+                    taskTitle = '环保知识问答';
+                    taskDescription = '学习垃圾分类知识，完成问答挑战，提升环保意识。';
+                    taskReward = '+30 积分';
+                    taskTime = '5分钟';
+                    taskIcon = 'fa-graduation-cap';
+                    document.getElementById('knowledge-interaction')?.classList.remove('hidden');
+                    break;
+                case 'report':
+                    taskTitle = '垃圾分类上报';
+                    taskDescription = '上传您进行垃圾分类的照片，我们将验证并给予奖励。';
+                    taskReward = '+50 积分';
+                    taskTime = '3分钟';
+                    taskIcon = 'fa-recycle';
+                    document.getElementById('report-interaction')?.classList.remove('hidden');
+                    break;
+                case 'auto':
+                    taskTitle = '绿色出行记录';
+                    taskDescription = '我们将自动检测您的步行/骑行数据，无需手动记录。';
+                    taskReward = '+20 积分';
+                    taskTime = '自动';
+                    taskIcon = 'fa-bicycle';
+                    document.getElementById('auto-interaction')?.classList.remove('hidden');
+                    break;
+                case 'ai':
+                    taskTitle = '个性化减碳方案';
+                    taskDescription = '基于您的生活习惯，AI为您定制了专属减碳方案。';
+                    taskReward = '+100 积分';
+                    taskTime = '7天';
+                    taskIcon = 'fa-lightbulb-o';
+                    document.getElementById('ai-interaction')?.classList.remove('hidden');
+                    break;
+            }
+            
+            // 更新任务详情
+            document.getElementById('task-title').textContent = taskTitle;
+            document.getElementById('task-detail-title').textContent = taskTitle;
+            document.getElementById('task-description').textContent = taskDescription;
+            document.getElementById('task-reward').textContent = taskReward;
+            document.getElementById('task-time').textContent = taskTime;
+            
+            // 使用Font Awesome图标
+            const taskIconElement = document.getElementById('task-icon-fa');
+            if (taskIconElement) {
+                taskIconElement.className = `fa ${taskIcon} text-3xl text-primary`;
+            }
+        }
+
+        // 返回主页
+        function backToHome() {
+            navigateTo('home');
+        }
+
+        // 显示任务完成弹窗
+        function showSuccessPopup(points) {
+            const rewardPoints = document.getElementById('reward-points');
+            const taskSuccess = document.getElementById('task-success');
+            
+            if (rewardPoints) {
+                rewardPoints.textContent = points;
+            }
+            
+            if (taskSuccess) {
+                taskSuccess.classList.remove('hidden');
+            }
+        }
+
+        // 关闭任务完成弹窗
+        function closeSuccessPopup() {
+            const taskSuccess = document.getElementById('task-success');
+            if (taskSuccess) {
+                taskSuccess.classList.add('hidden');
+            }
+            backToHome();
+        }
+
+        // 移除照片预览
+        function removePreview() {
+            document.getElementById('preview-img').src = '';
+            document.getElementById('report-preview').classList.add('hidden');
+            document.getElementById('report-upload').value = '';
+        }
+
+        // 显示成就详情
+        function showAchievementDetail(achievementId) {
+            console.log('Showing achievement:', achievementId);
+            
+            const achievement = achievements[achievementId];
+            
+            if (!achievement) {
+                console.error('Achievement not found:', achievementId);
+                return;
+            }
+            
+            // 更新弹窗内容
+            document.getElementById('achievement-title').textContent = achievement.title;
+            document.getElementById('achievement-description').textContent = achievement.description;
+            document.getElementById('achievement-requirements').textContent = achievement.requirements;
+            document.getElementById('achievement-rewards').textContent = achievement.rewards;
+            
+            // 设置图标
+            const iconElement = document.getElementById('achievement-icon-fa');
+            if (iconElement) {
+                iconElement.className = `fa ${achievement.icon} text-3xl text-green-600`;
+            }
+            
+            // 设置徽章状态
+            const badgeElement = document.getElementById('achievement-badge');
+            if (badgeElement) {
+                badgeElement.textContent = achievement.status;
+                if (achievement.status === '已获得') {
+                    badgeElement.className = 'inline-block bg-accent text-primary-dark text-xs font-bold px-3 py-1 rounded-full mb-2';
+                } else {
+                    badgeElement.className = 'inline-block bg-gray-200 text-gray-600 text-xs font-bold px-3 py-1 rounded-full mb-2';
+                }
+            }
+            
+            // 设置进度条
+            const progressContainer = document.getElementById('achievement-progress-container');
+            if (progressContainer) {
+                if (achievement.progress && achievement.progressText) {
+                    progressContainer.classList.remove('hidden');
+                    const progressBar = document.getElementById('achievement-progress-bar');
+                    if (progressBar) {
+                        progressBar.style.width = `${achievement.progress}%`;
+                    }
+                    const progressText = document.getElementById('achievement-progress-text');
+                    if (progressText) {
+                        progressText.textContent = achievement.progressText;
+                    }
+                } else {
+                    progressContainer.classList.add('hidden');
+                }
+            }
+            
+            // 显示弹窗
+            const achievementModal = document.getElementById('achievement-modal');
+            if (achievementModal) {
+                achievementModal.classList.remove('hidden');
+            }
+        }
+
+        // 关闭成就详情弹窗
+        function closeAchievementModal() {
+            const achievementModal = document.getElementById('achievement-modal');
+            if (achievementModal) {
+                achievementModal.classList.add('hidden');
+            }
+        }
+
+        // 初始化碳资产账户标签页
+        function initCarbonAssetsTabs() {
+            console.log('Initializing carbon assets tabs');
+            
+            // 获取所有标签按钮和内容
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            if (tabButtons.length === 0) {
+                console.warn('No tab buttons found');
+                return;
+            }
+            
+            // 为每个标签按钮添加点击事件
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    console.log('Tab clicked:', button.id);
+                    
+                    // 移除所有按钮的激活状态
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active', 'text-primary', 'border-b-2', 'border-primary');
+                        btn.classList.add('text-gray-500');
+                    });
+                    
+                    // 激活当前按钮
+                    button.classList.add('active', 'text-primary', 'border-b-2', 'border-primary');
+                    button.classList.remove('text-gray-500');
+                    
+                    // 隐藏所有内容
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // 显示对应内容
+                    const tabId = button.id.replace('tab-', '') + '-content';
+                    console.log('Showing tab content:', tabId);
+                    const tabContent = document.getElementById(tabId);
+                    if (tabContent) {
+                        tabContent.classList.remove('hidden');
+                    }
+                });
+            });
+        }
+
+        // 快速操作导航函数
+        function navigateToTransfer() {
+            alert('积分转让功能开发中...');
+        }
+
+        function navigateToHistory() {
+            // 切换到积分明细标签页（包含历史记录）
+            const tabPoints = document.getElementById('tab-points');
+            if (tabPoints) {
+                tabPoints.click();
+            }
+        }
+
+        // 捐赠相关功能
+        function selectDonateProject(projectId) {
+            currentDonateProject = donateProjects[projectId];
+            if (!currentDonateProject) return;
+            
+            // 更新捐赠效果显示
+            document.getElementById('donate-effect').textContent = currentDonateProject.effect;
+        }
+
+        function selectDonateAmount(amount) {
+            currentDonateAmount = amount;
+            document.getElementById('selected-donate-amount').textContent = `${amount} 积分`;
+            document.getElementById('custom-donate-amount').value = amount;
+            
+            // 更新捐赠效果文本
+            if (currentDonateProject) {
+                const units = Math.floor(amount / currentDonateProject.costPerUnit);
+                const effectText = `${amount}积分 = ${units}${currentDonateProject.unit}${currentDonateProject.unit === '天' ? '的保护工作' : currentDonateProject.unit === '公斤' ? '海洋垃圾清理' : '树苗种植'}`;
+                document.getElementById('donate-effect').textContent = effectText;
+            }
+        }
+
+        function confirmDonate() {
+            if (!currentDonateProject) {
+                currentDonateProject = donateProjects.tree; // 默认选中植树项目
+            }
+            
+            // 更新捐赠弹窗内容
+            document.getElementById('donate-title').textContent = '确认捐赠';
+            document.getElementById('donate-project-name').textContent = currentDonateProject.name;
+            document.getElementById('donate-project-desc').textContent = currentDonateProject.description;
+            document.getElementById('donate-amount').textContent = currentDonateAmount;
+            
+            // 设置图标
+            const iconElement = document.getElementById('donate-icon-fa');
+            iconElement.className = `fa ${currentDonateProject.icon} text-3xl text-green-600`;
+            
+            // 计算捐赠效果
+            const units = Math.floor(currentDonateAmount / currentDonateProject.costPerUnit);
+            const effectText = `您的捐赠将支持: ${units}${currentDonateProject.unit}${currentDonateProject.unit === '天' ? '的野生动物保护工作' : currentDonateProject.unit === '公斤' ? '海洋垃圾清理' : '树苗种植'}`;
+            document.getElementById('donate-effect-text').textContent = effectText;
+            
+            // 计算剩余积分
+            const currentPoints = 2580;
+            const remaining = currentPoints - currentDonateAmount;
+            document.getElementById('donate-remaining').textContent = remaining;
+            
+            // 显示捐赠弹窗
+            document.getElementById('donate-modal').classList.remove('hidden');
+        }
+
+        function confirmDonation() {
+            if (!currentDonateProject || !currentDonateAmount) return;
+            
+            const units = Math.floor(currentDonateAmount / currentDonateProject.costPerUnit);
+            alert(`感谢您的爱心捐赠！\n您已为"${currentDonateProject.name}"捐赠${currentDonateAmount}积分\n支持了${units}${currentDonateProject.unit}${currentDonateProject.unit === '天' ? '的保护工作' : currentDonateProject.unit === '公斤' ? '海洋垃圾清理' : '树苗种植'}`);
+            closeDonateModal();
+            navigateTo('exchange');
+        }
+
+        function closeDonateModal() {
+            document.getElementById('donate-modal').classList.add('hidden');
+        }
+
+        function viewAllDonations() {
+            alert('查看全部捐赠记录功能开发中...');
+        }
+
+        function viewDonateCertificate() {
+            alert('查看捐赠证书功能开发中...');
+        }
+
+        // 社区相关功能
+        function joinCommunity() {
+            // 显示加入成功弹窗
+            document.getElementById('community-success').classList.remove('hidden');
+        }
+
+        function closeCommunitySuccess() {
+            document.getElementById('community-success').classList.add('hidden');
+            // 可以在这里更新页面状态，比如显示已加入状态
+            const joinSection = document.querySelector('#community-page main section:nth-child(2)');
+            if (joinSection) {
+                joinSection.innerHTML = `
+                    <div class="bg-white rounded-xl shadow-card p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                <i class="fa fa-check-circle text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">已加入社区</h3>
+                                <p class="text-xs text-gray-500">欢迎您，环保先锋！</p>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-3">
+                            <p class="text-sm text-gray-600">您现在可以：发布动态、参与话题讨论、报名社区活动、与环保达人交流</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function viewAllTopics() {
+            alert('查看全部话题功能开发中...');
+        }
+
+        function viewAllCommunityActivities() {
+            alert('查看全部社区活动功能开发中...');
+        }
+
+        function viewAllCommunityStars() {
+            alert('查看全部社区达人功能开发中...');
+        }
+    </script>
+</body>
+</html>
